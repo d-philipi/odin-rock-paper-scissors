@@ -1,14 +1,28 @@
 # Rock Paper Scissors
 
-A console-based Rock Paper Scissors game built with vanilla JavaScript as part of [The Odin Project](https://www.theodinproject.com/) curriculum. The game runs in the browser using `prompt()` for player input and `console.log()` for round results. There is no graphical user interface yet—the focus is on game logic and function organization.
+A Rock Paper Scissors game built with vanilla JavaScript as part of [The Odin Project](https://www.theodinproject.com/) curriculum. The project started as a console-based game driven by `prompt()` and `console.log()`, and has since been extended with a **browser UI** and **DOM manipulation** via `scriptGame.js`.
+
+## Current Status
+
+The active version runs in the browser with clickable buttons, live scoreboard, choice display, and visual feedback. Open `index.html` to play — no Developer Tools or prompts required.
+
+| Feature | Status |
+|---------|--------|
+| Console game (`script.js`) | Preserved as the original implementation |
+| UI with buttons | Implemented |
+| DOM score & choice updates | Implemented |
+| Result text & images | Implemented |
+| First to 5 points wins | Implemented |
+| Tie round UI feedback | Partial — ties do not yet update the choice/result display |
+
+The page currently loads `scriptGame.js`. The original `script.js` remains in the repo for reference but is not linked from `index.html`.
 
 ## How to Run
 
 1. Clone or download this repository.
 2. Open `index.html` in a web browser (Chrome, Firefox, Edge, etc.).
-3. Open the browser's **Developer Tools** (F12 or right-click → Inspect) and go to the **Console** tab to see round results and scores.
-4. When prompted, type your choice: `rock`, `paper`, or `scissors`.
-5. Play 5 rounds. After the final round, an alert will announce the overall winner.
+3. Click **Rock**, **Paper**, or **Scissors** to play a round.
+4. Scores update on the page after each win or loss. The first player to reach **5 points** wins the game.
 
 ## Game Rules
 
@@ -20,45 +34,108 @@ A console-based Rock Paper Scissors game built with vanilla JavaScript as part o
 
 - Each round compares your choice against the computer's random choice.
 - A tie gives neither player a point.
-- The game lasts **5 rounds**. Whoever has the higher score after round 5 wins.
+- The game ends when either the player or the computer reaches **5 points**.
 
 ## Project Structure
 
 ```
 odin-rock-paper-scissors/
-├── index.html   # Minimal HTML page that loads script.js
-├── script.js    # All game logic
-└── README.md    # This file
-```
-
-### `index.html`
-
-A simple HTML shell. It sets the page title and loads `script.js` at the bottom of the `<body>`. No visible UI elements—the game is driven entirely by JavaScript prompts and console output.
-
----
-
-## Code Overview
-
-All logic lives in `script.js`. The file is organized around **state variables**, **helper functions**, and a **recursive game loop**.
-
-### State Variables
-
-These variables track the game across all rounds:
-
-```javascript
-let round = 0;           // Current round number (incremented after each round)
-let humanScore = 0;      // Points earned by the human player
-let computerScore = 0;   // Points earned by the computer
-```
-
-Two additional variables store the current round's choices and are updated before each new round:
-
-```javascript
-let humanSelection = getHumanChoice();
-let computerSelection = getComputerChoice();
+├── index.html       # Game page — layout, UI elements, loads scriptGame.js
+├── scriptGame.js    # UI version — DOM manipulation + game logic
+├── script.js        # Original console version (prompt + console.log)
+├── style.css        # Layout and visual styling
+├── finger_point.png # Result image (shown on win/loss)
+├── question.png     # Placeholder image (shown before first result)
+└── README.md        # This file
 ```
 
 ---
+
+## UI Overview (`index.html`)
+
+The page is divided into four main areas:
+
+```
+┌─────────────────────────────────────────┐
+│           Rock Paper Scissors           │
+├──────────────────┬──────────────────────┤
+│     Player       │      Computer        │
+│   Score: 0       │    Score: 0          │
+│   Choice: None   │    Choice: None      │
+├──────────────────┴──────────────────────┤
+│              Result                     │
+│         [question / finger image]       │
+│         "What will you choose?"         │
+├─────────────────────────────────────────┤
+│    [Rock]    [Paper]    [Scissors]      │
+└─────────────────────────────────────────┘
+```
+
+### Key HTML elements
+
+| Element | Selector | Purpose |
+|---------|----------|---------|
+| Player score | `.player-score p` | Displays the human score |
+| Computer score | `.computer-score p` | Displays the computer score |
+| Player choice | `.player-choice p` | Shows the player's last pick |
+| Computer choice | `.computer-choice p` | Shows the computer's last pick |
+| Result title | `.result-title` | Shows round/game outcome heading |
+| Result text | `#result-text` | Describes the round result |
+| Result image | `#result-image` | Finger-point image on win/loss |
+| Question image | `#question-image` | Shown before a result is decided |
+| Buttons | `#rock`, `#paper`, `#scissors` | Player input |
+
+---
+
+## Styling (`style.css`)
+
+The UI uses **Flexbox** for layout and **CSS nesting** for scoped selectors.
+
+- The page is centered vertically and horizontally with a card-style `.container`.
+- `.game-container` splits the screen into left (Player) and right (Computer) columns.
+- `.result-container` stacks the title, images, and result text.
+- Buttons have hover effects (`transform`, `box-shadow`, color transition).
+- `#result-image` starts hidden and is shown by JavaScript after a win or loss.
+- The finger image is flipped horizontally (`scaleX(-1)`) when the player wins and shown normally when the computer wins.
+
+---
+
+## Code Overview — UI Version (`scriptGame.js`)
+
+All interactive logic lives in `scriptGame.js`. The file is organized around **DOM references**, **event listeners**, and **game functions**.
+
+### DOM References
+
+Elements are captured when the script loads:
+
+```javascript
+const btnButtons = document.querySelector('.buttons-container');
+
+const humanScore = document.querySelector('.player-score').querySelector('p');
+const computerScore = document.querySelector('.computer-score').querySelector('p');
+const humanChoice = document.querySelector('.player-choice').querySelector('p');
+const computerChoice = document.querySelector('.computer-choice').querySelector('p');
+
+const resultText = document.getElementById('result-text');
+const resultImage = document.getElementById('result-image');
+const questionImage = document.getElementById('question-image');
+const resultTitle = document.querySelector('.result-title');
+```
+
+**Parent → child access:** For score and choice containers, the parent `div` is selected first with `querySelector('.player-score')`, then the inner `<p>` is reached with `.querySelector('p')`. This is necessary because those containers use **classes**, not **ids**.
+
+### Event Listener (Event Delegation)
+
+Instead of attaching a listener to each button individually, a single listener is placed on the button container:
+
+```javascript
+btnButtons.addEventListener('click', (e) => {
+    let humanChoice = e.target.id;
+    playRound(humanChoice);
+});
+```
+
+When a button is clicked, `e.target.id` returns `"rock"`, `"paper"`, or `"scissors"`, which is passed directly to `playRound()`.
 
 ### Functions
 
@@ -73,62 +150,13 @@ Generates the computer's move using `Math.random()`.
    - `0.33 – 0.65` → `"paper"`
    - `0.66 – 1.00` → `"scissors"`
 
-This splits the random range into three roughly equal segments, giving each choice an equal chance.
-
----
-
-#### `getHumanChoice()`
-
-Uses the browser's `prompt()` dialog to ask the player for their choice.
-
-```javascript
-let choice = prompt("Enter your choice: rock, paper, or scissors");
-return choice;
-```
-
-The returned string is passed to `playRound()`, where it is normalized with `.toLowerCase()` so input like `"Rock"` or `"PAPER"` still works.
-
----
-
-#### `updateScore(result)`
-
-Updates the round counter and scoreboard based on the outcome of a single round. This function was added beyond the basic Odin Project requirements.
-
-| Condition              | Effect              |
-|------------------------|---------------------|
-| `result` contains `"win"`  | `humanScore++`      |
-| `result` contains `"lose"` | `computerScore++`   |
-| Tie (neither word)     | Scores unchanged    |
-
-`round` is incremented on every call, regardless of outcome. Ties still count as a played round but do not award points.
-
----
-
-#### `checkWinner()`
-
-Determines the overall game winner after all 5 rounds. Also added as an extension beyond the base assignment.
-
-| Condition                    | Message returned                              |
-|------------------------------|-----------------------------------------------|
-| `humanScore === computerScore` | `"It's a tie! No one wins the game!"`       |
-| `humanScore > computerScore`   | `"You win the game! You are the winner!"`   |
-| `computerScore > humanScore`   | `"You lose the game! Computer is the winner!"` |
-
-This function is called once, when `round === 5`, and its return value is shown via `alert()`.
-
----
-
-#### `playRound(humanChoice, computerChoice)`
+#### `playRound(humanChoice)`
 
 The core logic for a single round.
 
-1. **Normalize input** — `humanChoice.toLowerCase()` ensures case-insensitive comparison.
-2. **Determine result** — A nested ternary chain compares the two choices:
-   - Same choice → tie message
-   - Rock vs Scissors, Paper vs Rock, or Scissors vs Paper → human wins
-   - Any other combination → computer wins
-3. **Update score** — Calls `updateScore(result)` to increment the round and adjust scores.
-4. **Return result** — The outcome string is returned so `playGame()` can log it.
+1. Calls `getComputerChoice()` to get the computer's pick.
+2. Compares both choices with a nested ternary chain (same logic as the console version).
+3. Passes the result and both choices to `updateScore()`.
 
 Example outcomes:
 
@@ -138,100 +166,115 @@ Example outcomes:
 "You lose! paper beats rock"
 ```
 
----
+#### `updateScore(result, humanChoice, computerChoice)`
 
-#### `playGame()`
+Updates the page based on the round outcome.
 
-The main game loop. It runs recursively until 5 rounds are complete.
+| Condition | DOM updates |
+|-----------|-------------|
+| Player wins | Increment `.player-score`, show `#result-image` flipped, hide `#question-image`, update `#result-text` |
+| Computer wins | Increment `.computer-score`, show `#result-image` normal, hide `#question-image`, update `#result-text` |
+| Either score reaches 5 | Update `.result-title` with game-over message, hide `.buttons-container` |
 
-**Each iteration:**
-
-1. Logs the round result via `playRound()`.
-2. Logs a summary to the console:
-   - Human and computer choices
-   - Current round number
-   - Running scores for both players
-3. Checks if `round === 5`:
-   - **Yes** → Shows the final winner with `alert(checkWinner())` and stops.
-   - **No** → Prompts for a new human choice, generates a new computer choice, and calls `playGame()` again.
-
-The game starts immediately when the script loads:
+Score values are read and written via `textContent`:
 
 ```javascript
-playGame();
+humanScore.textContent = parseInt(humanScore.textContent) + 1;
+```
+
+Image visibility is toggled via the `style` property:
+
+```javascript
+resultImage.style.display = "block";
+questionImage.style.display = "none";
+resultImage.style.transform = "scaleX(-1)"; // player win
 ```
 
 ---
 
-## Game Flow Diagram
+## Code Overview — Console Version (`script.js`)
+
+The original implementation is kept for reference. It uses:
+
+- **State variables** (`round`, `humanScore`, `computerScore`) instead of DOM elements
+- **`prompt()`** for player input via `getHumanChoice()`
+- **`console.log()`** for round results and running scores
+- **Recursion** in `playGame()` to loop through 5 rounds
+- **`alert()`** via `checkWinner()` to announce the final result
+
+To run the console version, change the `<script>` tag in `index.html` from `scriptGame.js` to `script.js` and open the browser console.
+
+---
+
+## Game Flow Diagram (UI Version)
 
 ```
 Page loads
     │
     ▼
-getHumanChoice()  ──► prompt for round 1
-getComputerChoice() ──► random choice for round 1
+DOM elements captured (querySelector / getElementById)
     │
     ▼
-playGame()
+User clicks Rock / Paper / Scissors
     │
-    ├──► playRound() ──► compare choices ──► updateScore()
-    ├──► console.log results & scores
+    ▼
+playRound(humanChoice)
     │
-    ├── round < 5? ──► get new choices ──► playGame() again
+    ├──► getComputerChoice() ──► random pick
+    ├──► compare choices ──► result string
     │
-    └── round === 5? ──► alert(checkWinner()) ──► game over
+    ▼
+updateScore(result)
+    │
+    ├── win  ──► humanScore++, update images & text
+    ├── lose ──► computerScore++, update images & text
+    └── score === 5? ──► game over, hide buttons
 ```
-
----
-
-## Example Console Output
-
-After a few rounds, the console might look like this:
-
-```
-You win! Rock beats Scissors
---------------------------------
-Human: rock
-Computer: scissors
---------------------------------
-Round: 1
-Human Score: 1
-Computer Score: 0
-You lose! paper beats rock
---------------------------------
-Human: rock
-Computer: paper
---------------------------------
-Round: 2
-Human Score: 1
-Computer Score: 1
-```
-
-After round 5, an alert appears with the final result, for example: **"You win the game! You are the winner!"**
 
 ---
 
 ## Concepts Used
 
-- **Arrow functions** (`() => {}`) for concise function syntax
+### Original (console)
+
+- **Arrow functions** for concise function syntax
 - **`Math.random()`** for pseudo-random number generation
 - **`prompt()` and `alert()`** for browser-based user interaction
 - **`console.log()`** for debugging and displaying game state
 - **Ternary operators** for compact conditional logic
 - **Recursion** — `playGame()` calls itself to advance through rounds
-- **String methods** — `.toLowerCase()` and `.includes()` for input handling and score updates
+- **String methods** — `.toLowerCase()` and `.includes()` for input handling
+
+### UI version (current)
+
+- **`document.querySelector()` / `getElementById()`** — selecting DOM elements
+- **Parent → child navigation** — `.querySelector('p')` on a captured parent
+- **`textContent`** — reading and writing text inside elements
+- **`style` property** — toggling visibility and CSS transforms from JavaScript
+- **Event delegation** — one listener on `.buttons-container` handles all button clicks
+- **`addEventListener('click', ...)`** — responding to user input
+- **`e.target.id`** — identifying which button was clicked
+- **Flexbox & CSS nesting** — page layout and component styling
 
 ---
 
 ## Possible Improvements
 
-These are not implemented yet but are common next steps for this project:
+- Handle tie rounds in the UI (update choice display and result text)
+- Resolve variable name shadowing in `updateScore()` (parameter names overlap with DOM references)
+- Add a "Play again" button after game over
+- Add input validation (ignore clicks on the container itself, not just buttons)
+- Show round counter on the page
+- Add animations or icons for rock, paper, and scissors choices
+- Responsive layout for smaller screens
 
-- Add input validation in `getHumanChoice()` (reject invalid choices)
-- Replace recursion with a `for` loop for clearer flow control
-- Build a DOM-based UI with clickable buttons instead of prompts
-- Display running scores on the page instead of only in the console
+---
+
+## Image Credits
+
+**finger_point.png:** Imagem de [DreamDigitalArtist](https://pixabay.com/pt/users/dreamdigitalartist-2065653/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=7148493) por [Pixabay](https://pixabay.com/pt//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=7148493)
+
+**question.png:** Imagem de [A Lemay](https://pixabay.com/pt/users/misskalem-39644033/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=10246930) por [Pixabay](https://pixabay.com/pt//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=10246930)
 
 ---
 

@@ -1,0 +1,129 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 50%;
+    height: 80%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .game-container-left {
+
+        h2,
+        div {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .player-title {}
+
+        .player-score {}
+
+        .player-choice {}
+    }
+
+    .game-container-right {
+        h2, div {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .computer-title {}
+        .computer-score {}
+        .computer-choice {}
+    }
+}
+
+.result-container {
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    .result-title {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    #result-image {
+        width: 200px;
+        height: 100px;
+        object-fit: cover;
+        margin-bottom: 10px;
+        display: none;
+    }
+
+    #question-image {
+        width: 200px;
+        height: 150px;
+        object-fit: contain;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    #result-text {
+        font-size: 18px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-align: center;
+        border: none;
+        background-color: #2a2a2af9;
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+        &:hover {
+            background-color: #191919;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+    }
+}

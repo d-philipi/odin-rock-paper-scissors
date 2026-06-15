@@ -4,8 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rock Paper Scissors</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script src="script.js"></script>
+    <div class="container">
+        <h1 class="title">Rock Paper Scissors</h1>
+        <div class="game-container">
+            <div class="game-container-left">
+                <h2 class="players-title">Player</h2>
+                <div class="player-score">
+                    <p>0</p>
+                </div>
+                <div class="player-choice">
+                    <p>None</p>
+                </div>
+            </div>
+            <div class="game-container-right">
+                <h2 class="computer-title">Computer</h2>
+                <div class="computer-score">
+                    <p>0</p>
+                </div>
+                <div class="computer-choice">
+                    <p>None</p>
+                </div>
+            </div>
+        </div>
+        <div class="result-container">
+            <h2 class="result-title">Result</h2>
+            <img src="./finger_point.png" alt="Finger Point result image" id="result-image">
+            <img src="./question.png" alt="Question result image" id="question-image">
+            <p id="result-text">What will you choose?</p>
+        </div>
+        <div class="buttons-container">
+            <button id="rock">Rock</button>
+            <button id="paper">Paper</button>
+            <button id="scissors">Scissors</button>
+        </div>
+    </div>
+    <script src="scriptGame.js"></script>
 </body>
 </html>
